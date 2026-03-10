@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "name": "Connaught Place EV Station",
+    "type": "EV",
+    "latitude": 28.6328,
+    "longitude": 77.2197,
+    "slots": [
+      {"time": "10:00 AM - 11:00 AM", "available": true},
+      {"time": "11:00 AM - 12:00 PM", "available": false}
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Karol Bagh CNG Station",
+    "type": "CNG",
+    "latitude": 28.6510,
+    "longitude": 77.1900,
+    "slots": [
+      {"time": "10:00 AM - 11:00 AM", "available": true},
+      {"time": "11:00 AM - 12:00 PM", "available": true}
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Indraprastha Gas Station - Dwarka",
+    "type": "CNG",
+    "latitude": 28.5921,
+    "longitude": 77.0460,
+    "slots": [
+      {"time": "10:00 AM - 11:00 AM", "available": true},
+      {"time": "11:00 AM - 12:00 PM", "available": false}
+    ]
+  },
+  {
+    "id": 4,
+    "name": "IndianOil CNG Station - Patia Square",
+    "type": "CNG",
+    "latitude": 20.3536,
+    "longitude": 85.8192,
+    "slots": [
+      {"time": "09:00 AM - 10:00 AM", "available": true},
+      {"time": "10:00 AM - 11:00 AM", "available": true}
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Bharat Petroleum CNG Station - KIIT Road",
+    "type": "CNG",
+    "latitude": 20.3558,
+    "longitude": 85.8221,
+    "slots": [
+      {"time": "11:00 AM - 12:00 PM", "available": true},
+      {"time": "12:00 PM - 01:00 PM", "available": false}
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Maharashtra Natural Gas CNG Station - Shivajinagar",
+    "type": "CNG",
+    "latitude": 18.5309,
+    "longitude": 73.8470,
+    "slots": [
+      {"time": "10:00 AM - 11:00 AM", "available": true},
+      {"time": "11:00 AM - 12:00 PM", "available": true}
+    ]
+  }
+]

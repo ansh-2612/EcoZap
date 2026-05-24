@@ -7,6 +7,8 @@ import com.example.ecozap.ui.navigation.Screen // ✅ uses your custom Screen cl
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.ecozap.ui.home.HomeScreen
+import com.example.ecozap.reachability.VehicleSetupScreen
+import com.example.ecozap.reachability.ReachabilityScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -16,11 +18,29 @@ fun NavGraph(navController: NavHostController) {
     ) {
         composable(Screen.Home.route) { HomeScreen(navController) }
 
-        // ✅ Add CngStationScreen with default null values
         composable(Screen.StationList.route) {
-            CngStationScreen(navController)   // no need to pass nulls
+            CngStationScreen(navController)
         }
 
-        composable(Screen.Profile.route) { /* ProfileScreen(navController) */ }
+        composable(Screen.StationDetails.route) { backStackEntry ->
+
+            val stationId =
+                backStackEntry.arguments?.getString("stationId")?.toIntOrNull()
+
+            StationDetailsScreen(
+                navController = navController,
+                stationId = stationId
+            )
+        }
+        composable(Screen.VehicleSetup.route) {
+            VehicleSetupScreen(navController)
+        }
+
+        composable(Screen.Reachability.route) {
+            ReachabilityScreen(navController)
+        }
+
+        composable(Screen.Profile.route) { }
     }
+
 }

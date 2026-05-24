@@ -6,8 +6,9 @@
     "latitude": 28.6328,
     "longitude": 77.2197,
     "slots": [
-      {"time": "10:00 AM - 11:00 AM", "available": true},
-      {"time": "11:00 AM - 12:00 PM", "available": false}
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": false },
+      { "time": "12:00 PM - 01:00 PM", "available": true }
     ]
   },
   {
@@ -17,52 +18,249 @@
     "latitude": 28.6510,
     "longitude": 77.1900,
     "slots": [
-      {"time": "10:00 AM - 11:00 AM", "available": true},
-      {"time": "11:00 AM - 12:00 PM", "available": true}
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true },
+      { "time": "12:00 PM - 01:00 PM", "available": false }
     ]
   },
   {
     "id": 3,
-    "name": "Indraprastha Gas Station - Dwarka",
-    "type": "CNG",
-    "latitude": 28.5921,
-    "longitude": 77.0460,
+    "name": "Patia EV Fast Charging Hub",
+    "type": "EV",
+    "latitude": 20.3536,
+    "longitude": 85.8192,
     "slots": [
-      {"time": "10:00 AM - 11:00 AM", "available": true},
-      {"time": "11:00 AM - 12:00 PM", "available": false}
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": false }
     ]
   },
   {
     "id": 4,
-    "name": "IndianOil CNG Station - Patia Square",
-    "type": "CNG",
-    "latitude": 20.3536,
-    "longitude": 85.8192,
-    "slots": [
-      {"time": "09:00 AM - 10:00 AM", "available": true},
-      {"time": "10:00 AM - 11:00 AM", "available": true}
-    ]
-  },
-  {
-    "id": 5,
-    "name": "Bharat Petroleum CNG Station - KIIT Road",
+    "name": "KIIT Road CNG Station",
     "type": "CNG",
     "latitude": 20.3558,
     "longitude": 85.8221,
     "slots": [
-      {"time": "11:00 AM - 12:00 PM", "available": true},
-      {"time": "12:00 PM - 01:00 PM", "available": false}
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": false },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Infocity EV Charging Point",
+    "type": "EV",
+    "latitude": 20.3489,
+    "longitude": 85.8125,
+    "slots": [
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true },
+      { "time": "12:00 PM - 01:00 PM", "available": true }
     ]
   },
   {
     "id": 6,
-    "name": "Maharashtra Natural Gas CNG Station - Shivajinagar",
+    "name": "Nandankanan Road CNG Pump",
     "type": "CNG",
-    "latitude": 18.5309,
-    "longitude": 73.8470,
+    "latitude": 20.3715,
+    "longitude": 85.8156,
     "slots": [
-      {"time": "10:00 AM - 11:00 AM", "available": true},
-      {"time": "11:00 AM - 12:00 PM", "available": true}
+      { "time": "10:00 AM - 11:00 AM", "available": false },
+      { "time": "11:00 AM - 12:00 PM", "available": false },
+      { "time": "12:00 PM - 01:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Jaydev Vihar EV Station",
+    "type": "EV",
+    "latitude": 20.2997,
+    "longitude": 85.8194,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": false },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Chandrasekharpur CNG Station",
+    "type": "CNG",
+    "latitude": 20.3379,
+    "longitude": 85.8171,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": false }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Rasulgarh EV Charging Station",
+    "type": "EV",
+    "latitude": 20.2961,
+    "longitude": 85.8562,
+    "slots": [
+      { "time": "10:00 AM - 11:00 AM", "available": false },
+      { "time": "11:00 AM - 12:00 PM", "available": false },
+      { "time": "12:00 PM - 01:00 PM", "available": false }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Khandagiri CNG Filling Station",
+    "type": "CNG",
+    "latitude": 20.2567,
+    "longitude": 85.7858,
+    "slots": [
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": false },
+      { "time": "12:00 PM - 01:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Sahid Nagar EV Charge Hub",
+    "type": "EV",
+    "latitude": 20.2875,
+    "longitude": 85.8448,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Airport Road CNG Station",
+    "type": "CNG",
+    "latitude": 20.2526,
+    "longitude": 85.8174,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": false },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Shikrapur EV Charging Hub",
+    "type": "EV",
+    "latitude": 18.6948,
+    "longitude": 74.1382,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": false }
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Shikrapur CNG Filling Station",
+    "type": "CNG",
+    "latitude": 18.6959,
+    "longitude": 74.1405,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": false },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Ranjangaon MIDC EV Station",
+    "type": "EV",
+    "latitude": 18.7612,
+    "longitude": 74.2981,
+    "slots": [
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true },
+      { "time": "12:00 PM - 01:00 PM", "available": false }
+    ]
+  },
+  {
+    "id": 16,
+    "name": "Ranjangaon CNG Pump",
+    "type": "CNG",
+    "latitude": 18.7595,
+    "longitude": 74.2968,
+    "slots": [
+      { "time": "10:00 AM - 11:00 AM", "available": false },
+      { "time": "11:00 AM - 12:00 PM", "available": true },
+      { "time": "12:00 PM - 01:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Wagholi EV Fast Charger",
+    "type": "EV",
+    "latitude": 18.5793,
+    "longitude": 73.9864,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 18,
+    "name": "Wagholi CNG Station",
+    "type": "CNG",
+    "latitude": 18.5807,
+    "longitude": 73.9849,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": false },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Koregaon Bhima EV Charge Point",
+    "type": "EV",
+    "latitude": 18.6472,
+    "longitude": 74.0614,
+    "slots": [
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": false },
+      { "time": "12:00 PM - 01:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 20,
+    "name": "Koregaon Bhima CNG Pump",
+    "type": "CNG",
+    "latitude": 18.6491,
+    "longitude": 74.0642,
+    "slots": [
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": true },
+      { "time": "12:00 PM - 01:00 PM", "available": false }
+    ]
+  },
+  {
+    "id": 21,
+    "name": "Talegaon Dhamdhere EV Station",
+    "type": "EV",
+    "latitude": 18.6704,
+    "longitude": 74.1517,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": false },
+      { "time": "11:00 AM - 12:00 PM", "available": true }
+    ]
+  },
+  {
+    "id": 22,
+    "name": "Chakan Road CNG Station",
+    "type": "CNG",
+    "latitude": 18.7589,
+    "longitude": 73.8584,
+    "slots": [
+      { "time": "09:00 AM - 10:00 AM", "available": true },
+      { "time": "10:00 AM - 11:00 AM", "available": true },
+      { "time": "11:00 AM - 12:00 PM", "available": false }
     ]
   }
 ]

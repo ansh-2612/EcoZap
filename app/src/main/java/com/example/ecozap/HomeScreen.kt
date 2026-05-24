@@ -7,13 +7,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ElectricCar
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,22 +26,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import com.example.ecozap.ActionCard
 import com.example.ecozap.MapWithLocation
+import com.example.ecozap.PriceCard
 import com.example.ecozap.Station
+import com.example.ecozap.StationCard
+import com.example.ecozap.StatusPill
 import com.example.ecozap.findNearestStation
 import com.example.ecozap.getCurrentLocationOnce
 import com.example.ecozap.loadStationsFromAssets
 import com.example.ecozap.ui.navigation.Screen
 import com.example.ecozap.ui.theme.*
 import com.google.android.gms.location.LocationServices
-import com.example.ecozap.PriceCard
-import com.example.ecozap.ActionCard
-import com.example.ecozap.StationCard
-import com.example.ecozap.StatusPill
 import kotlinx.coroutines.launch
-
+import com.example.ecozap.reachability.loadVehicleProfile
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 @Composable
 fun HomeScreen(nav: NavController) {
+
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -96,6 +100,7 @@ fun HomeScreen(nav: NavController) {
 
     val nearestStation = nearestPair?.first
     val nearestDistanceKm = nearestPair?.second?.div(1000f)
+
     val distanceText = if (nearestDistanceKm != null) {
         String.format("%.1f km", nearestDistanceKm)
     } else {
@@ -103,6 +108,7 @@ fun HomeScreen(nav: NavController) {
     }
 
     val availableSlotCount = nearestStation?.slots?.count { it.available } ?: 0
+
     val slotsText = when {
         nearestStation == null -> "No station"
         availableSlotCount > 0 -> "$availableSlotCount slots available"
@@ -114,15 +120,18 @@ fun HomeScreen(nav: NavController) {
 
     Scaffold(
         containerColor = Night900,
-        bottomBar = { BottomNav(nav) }
+        bottomBar = { BottomNav(nav, context) }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             Text(
                 text = "Welcome to EcoZap",
                 style = MaterialTheme.typography.headlineMedium,
@@ -134,13 +143,26 @@ fun HomeScreen(nav: NavController) {
                 PriceCard(
                     title = "CNG Price",
                     price = "₹ 78.50/kg",
-                    icon = { Icon(Icons.Default.LocalGasStation, null, tint = NeonGreen) },
+                    icon = {
+                        Icon(
+                            Icons.Default.LocalGasStation,
+                            contentDescription = null,
+                            tint = NeonGreen
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
+
                 PriceCard(
                     title = "EV Charging",
                     price = "₹ 12.00/unit",
-                    icon = { Icon(Icons.Default.ElectricCar, null, tint = NeonCyan) },
+                    icon = {
+                        Icon(
+                            Icons.Default.ElectricCar,
+                            contentDescription = null,
+                            tint = NeonCyan
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -155,21 +177,57 @@ fun HomeScreen(nav: NavController) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ActionCard(
                     title = "EV station",
-                    icon = { Icon(Icons.Default.Map, null, tint = NeonGreen) },
+                    icon = {
+                        Icon(
+                            Icons.Default.Map,
+                            contentDescription = null,
+                            tint = NeonGreen
+                        )
+                    },
                     modifier = Modifier.weight(1f),
-                    onClick = { nav.navigate(Screen.StationList.route) }
+                    onClick = {
+                        nav.navigate(Screen.StationList.route)
+                    }
                 )
 
                 ActionCard(
                     title = "CNG Filling Station",
-                    icon = { Icon(Icons.Default.LocalGasStation, null, tint = NeonCyan) },
+                    icon = {
+                        Icon(
+                            Icons.Default.LocalGasStation,
+                            contentDescription = null,
+                            tint = NeonCyan
+                        )
+                    },
                     modifier = Modifier.weight(1f),
-                    onClick = { nav.navigate(Screen.StationList.route) }
+                    onClick = {
+                        nav.navigate(Screen.StationList.route)
+                    }
                 )
             }
 
+            ActionCard(
+                title = "Fuel Need",
+                icon = {
+                    Icon(
+                        Icons.Default.BatteryChargingFull,
+                        contentDescription = null,
+                        tint = NeonGreen
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    val profile = loadVehicleProfile(context)
+                    if (profile == null) {
+                        nav.navigate(Screen.VehicleSetup.route)
+                    } else {
+                        nav.navigate(Screen.Reachability.route)
+                    }
+                }
+            )
+
             Text(
-                "Nearby Stations",
+                text = "Nearby Stations",
                 color = Color.White,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold
@@ -208,7 +266,13 @@ fun HomeScreen(nav: NavController) {
                     labelBottom = if (nearestEv != null) "Available" else "Not found",
                     colorTop = NeonGreen,
                     colorBottom = NeonGreen,
-                    icon = { Icon(Icons.Default.CheckCircle, null, tint = NeonGreen) }
+                    icon = {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = NeonGreen
+                        )
+                    }
                 )
 
                 StatusPill(
@@ -218,8 +282,11 @@ fun HomeScreen(nav: NavController) {
                     colorBottom = if (nearestCng != null) NeonGreen else DangerRed,
                     icon = {
                         Icon(
-                            if (nearestCng != null) Icons.Default.CheckCircle else Icons.Default.Close,
-                            null,
+                            imageVector = if (nearestCng != null)
+                                Icons.Default.CheckCircle
+                            else
+                                Icons.Default.Close,
+                            contentDescription = null,
                             tint = if (nearestCng != null) NeonGreen else DangerRed
                         )
                     }
@@ -230,31 +297,80 @@ fun HomeScreen(nav: NavController) {
 }
 
 @Composable
-private fun BottomNav(nav: NavController) {
+private fun BottomNav(nav: NavController, context: android.content.Context){
     NavigationBar(containerColor = Night800) {
+
         NavigationBarItem(
             selected = false,
-            onClick = { nav.navigate(Screen.StationList.route) },
-            icon = { Icon(Icons.Default.Map, contentDescription = "Map", tint = NeonBlue) },
-            label = { Text("Book") }
+            onClick = {
+                nav.navigate(Screen.StationList.route)
+            },
+            icon = {
+                Icon(
+                    Icons.Default.Map,
+                    contentDescription = "Map",
+                    tint = NeonBlue
+                )
+            },
+            label = {
+                Text("Book")
+            }
         )
+
         NavigationBarItem(
             selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.Call, contentDescription = "SOS", tint = Color.White) },
-            label = { Text("SOS") }
+            onClick = {
+                // SOS screen later
+            },
+            icon = {
+                Icon(
+                    Icons.Default.Call,
+                    contentDescription = "SOS",
+                    tint = Color.White
+                )
+            },
+            label = {
+                Text("SOS")
+            }
         )
+
         NavigationBarItem(
             selected = false,
-            onClick = { },
-            icon = { Icon(Icons.Default.LocalGasStation, contentDescription = "Fuel", tint = Color.White) },
-            label = { Text("Fuel Need") }
+            onClick = {
+                val profile = loadVehicleProfile(context)
+                if (profile == null) {
+                    nav.navigate(Screen.VehicleSetup.route)
+                } else {
+                    nav.navigate(Screen.Reachability.route)
+                }
+            },
+            icon = {
+                Icon(
+                    Icons.Default.BatteryChargingFull,
+                    contentDescription = "Fuel Need",
+                    tint = Color.White
+                )
+            },
+            label = {
+                Text("Fuel Need")
+            }
         )
+
         NavigationBarItem(
             selected = false,
-            onClick = { nav.navigate(Screen.Profile.route) },
-            icon = { Icon(Icons.Default.Person, contentDescription = "You", tint = Color.White) },
-            label = { Text("You") }
+            onClick = {
+                nav.navigate(Screen.Profile.route)
+            },
+            icon = {
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = "You",
+                    tint = Color.White
+                )
+            },
+            label = {
+                Text("You")
+            }
         )
     }
 }

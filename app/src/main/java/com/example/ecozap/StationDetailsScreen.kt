@@ -22,6 +22,7 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
         if (station == null) { Text("Station not found"); return@BookingPage }
         var day by rememberSaveable { mutableStateOf(todayInIndia()) }
         var revision by remember { mutableIntStateOf(0) }
+        var notice by rememberSaveable(stationId, day, api.signedIn) { mutableStateOf<String?>(null) }
         val load = remember(day, revision) { RequestState() }
         var live by remember(day, revision) { mutableStateOf<ServerStation?>(null) }
         var slots by remember(day, revision) { mutableStateOf(emptyList<LiveSlot>()) }
@@ -48,20 +49,24 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
         BookingDate(day) { day = it }
         TextButton(enabled = !load.busy, onClick = { revision++ }) { Text("Refresh availability") }
         RequestStatus(load)
+        notice?.let { Text(it) }
         val serverId = live?.id
         if (serverId == null) {
             Text("Directory hours · ${station.slots.joinToString { it.time }}")
             if (!load.busy) Text("Live booking is unavailable for this station.")
         } else {
             key(serverId, day, api.session) {
-                ReserveSlot(api, serverId, day, slots, { navController.navigate(Screen.Profile.route) }, { revision++ })
+                ReserveSlot(api, serverId, day, slots, { navController.navigate(Screen.Profile.route) }) { message ->
+                    notice = message
+                    revision++
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ReserveSlot(api: EcoZapApi, station: String, day: String, slots: List<LiveSlot>, account: () -> Unit, refresh: () -> Unit) {
+private fun ReserveSlot(api: EcoZapApi, station: String, day: String, slots: List<LiveSlot>, account: () -> Unit, refresh: (String?) -> Unit) {
     var selected by rememberSaveable { mutableStateOf<String?>(null) }
     val slot = slots.find { it.id == selected && it.available }
     slots.forEach { s ->
@@ -98,18 +103,19 @@ private fun ReserveSlot(api: EcoZapApi, station: String, day: String, slots: Lis
     val requestId = rememberSaveable(selected, vehicleId, current, target) { UUID.randomUUID().toString() }
     val action = remember { RequestState() }
     val scope = rememberCoroutineScope()
-    var confirmation by rememberSaveable { mutableStateOf<String?>(null) }
     RequestStatus(action)
-    confirmation?.let { Text(it) }
-    Button(enabled = confirmation == null && !action.busy && slot != null &&
+    Button(enabled = !action.busy && slot != null &&
             (!ev || (start != null && end != null && start >= 0 && end > start && end <= (vehicle.batteryCapacity ?: 0.0))),
         onClick = {
             val id = slot?.id ?: return@Button
             action.launchIn(scope) {
-                val b = api.book(BookingInput(vehicle.id, station, id, day, if (ev) start else null,
-                    if (ev) end else null, requestId))
-                confirmation = "${b.status} · ${displayTime(b.startTime)} IST · Booking ${b.bookingId}"
+                val b = try { api.book(BookingInput(vehicle.id, station, id, day, if (ev) start else null,
+                    if (ev) end else null, requestId)) } catch (e: ApiException) {
+                    if (e.status == 409) { refresh(e.message); return@launchIn }
+                    throw e
+                }
+                refresh("${b.status} · ${displayTime(b.startTime)} IST · Booking ${b.bookingId}")
             }
         }) { Text("Confirm booking") }
-    if (action.error != null || confirmation != null) TextButton(onClick = refresh) { Text("Reload slots") }
+    if (action.error != null) TextButton(onClick = { refresh(null) }) { Text("Reload slots") }
 }

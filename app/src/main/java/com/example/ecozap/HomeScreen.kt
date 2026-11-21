@@ -180,7 +180,7 @@ fun HomeScreen(nav: NavController) {
                     },
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        nav.navigate(Screen.StationList.route)
+                        nav.navigate(Screen.EvStation.route)
                     }
                 )
 
@@ -195,7 +195,7 @@ fun HomeScreen(nav: NavController) {
                     },
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        nav.navigate(Screen.StationList.route)
+                        nav.navigate(Screen.CngStation.route)
                     }
                 )
             }

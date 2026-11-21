@@ -25,6 +25,9 @@ fun NavGraph(navController: NavHostController) {
             CngStationScreen(navController)
         }
 
+        composable(Screen.EvStation.route) { CngStationScreen(navController, initialType = "EV") }
+        composable(Screen.CngStation.route) { CngStationScreen(navController, initialType = "CNG") }
+
         composable(Screen.StationDetails.route) { backStackEntry ->
 
             val stationId =

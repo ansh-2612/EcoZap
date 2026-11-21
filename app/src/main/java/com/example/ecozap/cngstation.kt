@@ -32,7 +32,8 @@ import kotlinx.coroutines.launch
 fun CngStationScreen(
     navController: NavController,
     userLat: Double? = null,
-    userLng: Double? = null
+    userLng: Double? = null,
+    initialType: String = "ALL"
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -40,7 +41,7 @@ fun CngStationScreen(
 
     val stations = remember { loadStationsFromAssets(context, "delhi_stations.json") }
 
-    var selectedType by remember { mutableStateOf("ALL") }
+    var selectedType by androidx.compose.runtime.saveable.rememberSaveable(initialType) { mutableStateOf(initialType) }
 
     var userLocation by remember { mutableStateOf<Location?>(null) }
     var loadingLocation by remember { mutableStateOf(false) }

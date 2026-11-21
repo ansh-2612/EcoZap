@@ -107,13 +107,7 @@ fun HomeScreen(nav: NavController) {
         "N/A"
     }
 
-    val availableSlotCount = nearestStation?.slots?.count { it.available } ?: 0
-
-    val slotsText = when {
-        nearestStation == null -> "No station"
-        availableSlotCount > 0 -> "$availableSlotCount slots available"
-        else -> "Fully booked"
-    }
+    val slotsText = "View live slots"
 
     val nearestEv = stations.firstOrNull { it.type.equals("EV", true) }
     val nearestCng = stations.firstOrNull { it.type.equals("CNG", true) }
@@ -238,7 +232,7 @@ fun HomeScreen(nav: NavController) {
                 distanceText = distanceText,
                 slotsText = slotsText,
                 onBook = {
-                    nav.navigate(Screen.StationList.route)
+                    nav.navigate(nearestStation?.let { Screen.StationDetails.createRoute(it.id) } ?: Screen.StationList.route)
                 }
             )
 
@@ -263,7 +257,7 @@ fun HomeScreen(nav: NavController) {
             ) {
                 StatusPill(
                     labelTop = "EV Station:",
-                    labelBottom = if (nearestEv != null) "Available" else "Not found",
+                    labelBottom = if (nearestEv != null) "Listed" else "Not found",
                     colorTop = NeonGreen,
                     colorBottom = NeonGreen,
                     icon = {
@@ -277,7 +271,7 @@ fun HomeScreen(nav: NavController) {
 
                 StatusPill(
                     labelTop = "CNG Station:",
-                    labelBottom = if (nearestCng != null) "Available" else "Not found",
+                    labelBottom = if (nearestCng != null) "Listed" else "Not found",
                     colorTop = DangerRed,
                     colorBottom = if (nearestCng != null) NeonGreen else DangerRed,
                     icon = {

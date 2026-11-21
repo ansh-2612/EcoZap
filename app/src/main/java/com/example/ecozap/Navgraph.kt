@@ -12,6 +12,9 @@ import com.example.ecozap.reachability.ReachabilityScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
+    val context = LocalContext.current
+    val api = androidx.compose.runtime.remember { com.example.ecozap.booking.EcoZapApi(context.applicationContext) }
+    val directory = androidx.compose.runtime.remember { loadStationsFromAssets(context) }
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -29,7 +32,7 @@ fun NavGraph(navController: NavHostController) {
 
             StationDetailsScreen(
                 navController = navController,
-                stationId = stationId
+                stationId = stationId, api = api
             )
         }
         composable(Screen.VehicleSetup.route) {
@@ -40,7 +43,7 @@ fun NavGraph(navController: NavHostController) {
             ReachabilityScreen(navController)
         }
 
-        composable(Screen.Profile.route) { }
+        composable(Screen.Profile.route) { com.example.ecozap.booking.AccountScreen(api, directory) { navController.popBackStack() } }
     }
 
 }

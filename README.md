@@ -28,13 +28,13 @@ The application is built using modern Android development technologies and a Spr
 
 \- ⚡ View EV charging and CNG refueling information.
 
-\- 📅 Slot booking for charging and refueling (in development).
+\- 📅 Slot booking for charging and refueling.
 
-\- 👤 User authentication and management (in development).
+\- 👤 User authentication and management.
 
 \- 📱 Modern and responsive Android UI.
 
-\- 🔄 REST API-based frontend and backend communication (integration in progress).
+\- 🔄 REST API-based frontend and backend communication.
 
 
 
@@ -128,115 +128,27 @@ EcoZap/
 
 
 
-\## ⚙️ Getting Started
+## Run the booking flow locally
 
+From the project root on Windows, start Docker Desktop and run:
 
-
-\### 1. Clone the repository
-
-
-
+```powershell
+docker compose up -d
+cd backend
+.\mvnw.cmd spring-boot:run
 ```
 
-git clone https://github.com/ansh-2612/EcoZap.git
+Use JDK 17 or 21. Open the project root in Android Studio and run the debug app on an emulator. The emulator connects to Spring Boot at `http://10.0.2.2:8081`. For a USB device, use `adb reverse tcp:8081 tcp:8081` and set `ECOZAP_API_URL=http://localhost:8081` in your user Gradle properties. For a hosted API, set that property to the HTTPS origin, without `/api`.
 
-cd EcoZap
+On first startup the local Mongo container imports the existing Android asset `app/src/main/assets/delhi_stations.json`. It uses stable IDs for each station and slot. The sample availability flags stay in the asset; dated availability comes from saved reservations. To import missing demo records into an existing local Compose volume, run `docker compose exec mongo mongosh --quiet /docker-entrypoint-initdb.d/10-ecozap.js`. Existing records are preserved.
 
-```
+1. Open **You**, create an account and add a Demo Electric car or Demo CNG car with a registration number.
+2. Open a matching Delhi station, select a future date and an available time, and choose the vehicle. EV bookings also require the current and target energy in kWh.
+3. Confirm the booking. Its ID appears after MongoDB saves it. Open **You → My bookings** to view or cancel it.
 
+Bookings use India Standard Time. Stations can still be browsed offline. A station needs a matching name, fuel type and coordinates on the server before reservations are enabled. The local demo is separate from real station operators.
 
-
-\### 2. Run the Android frontend
-
-
-
-1\. Open the project root in Android Studio.
-
-2\. Sync the Gradle dependencies.
-
-3\. Launch an Android emulator or connect a physical device.
-
-4\. Build and run the application.
-
-
-
-\### 3. Run the Spring Boot backend
-
-
-
-1\. Open the `backend` folder in IntelliJ IDEA.
-
-2\. Install the required Java version and load the Maven dependencies.
-
-3\. Configure the MongoDB and Redis environment variables:
-
-
-
-&#x20;  - `MONGODB\_URI` – MongoDB Atlas connection string
-
-&#x20;  - `REDIS\_PASSWORD` – Redis database password
-
-
-
-4\. Run the Spring Boot application.
-
-
-
-Alternatively, from the backend directory on Windows:
-
-
-
-```
-
-.\\mvnw.cmd spring-boot:run
-
-```
-
-
-
-The backend is configured to run at:
-
-
-
-```
-
-http://localhost:8081
-
-```
-
-
-
-\## 🔐 Security
-
-
-
-Database credentials are managed using environment variables and are not included in the repository. Configure your own MongoDB Atlas and Redis credentials before running the backend.
-
-
-
-\## 📌 Current Project Status
-
-
-
-| Module | Status |
-
-|---|---|
-
-| Android UI | Developed |
-
-| Station Discovery | Implemented |
-
-| Spring Boot Backend | In Development |
-
-| MongoDB Integration | In Development |
-
-| Redis Integration | In Development |
-
-| Frontend–Backend Integration | In Progress |
-
-| Complete Slot Booking System | In Progress |
-
-
+For an existing MongoDB or Redis instance, configure `MONGODB_URI` (including the database name), `REDIS_HOST`, `REDIS_PORT`, `REDIS_USERNAME`, `REDIS_PASSWORD`, and `REDIS_SSL` as appropriate. Set a random `JWT_SECRET` of at least 32 bytes to keep sessions valid across server restarts. Local development otherwise generates a temporary signing key.
 
 \## 🔮 Future Enhancements
 
@@ -244,13 +156,13 @@ Database credentials are managed using environment variables and are not include
 
 \- Real-time station availability and booking updates.
 
-\- Complete frontend and backend integration.
+
 
 \- Google Maps integration for navigation.
 
 \- Secure online payments.
 
-\- Booking history and notifications.
+\- Booking notifications.
 
 \- Admin dashboard for station management.
 

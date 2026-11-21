@@ -167,12 +167,7 @@ fun CngStationScreen(
                             }
                         }
 
-                        val availableCount = station.slots.count { it.available }
-                        val slotText = if (availableCount > 0) {
-                            "$availableCount slots available"
-                        } else {
-                            "Fully booked"
-                        }
+                        val slotText = "View live slots"
 
                         StationListCard(
                             station = station,
@@ -279,19 +274,6 @@ fun StationListCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (station.slots.count { it.available } == 0) {
-                Text(
-                    text = "Fully booked",
-                    color = DangerRed,
-                    fontWeight = FontWeight.Medium
-                )
-            } else if (station.slots.count { it.available } <= 1) {
-                Text(
-                    text = "Few slots left",
-                    color = DangerRed,
-                    fontWeight = FontWeight.Medium
-                )
-            }
         }
     }
 }

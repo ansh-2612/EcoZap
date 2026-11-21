@@ -1,7 +1,14 @@
+import java.net.URI
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+val serverUrl = providers.gradleProperty("ECOZAP_API_URL").orElse(providers.environmentVariable("ECOZAP_API_URL"))
+fun quotedUrl(value: String): String {
+    require(value.isEmpty() || (URI(value).host != null && value.none { it == '"' || it == '\\' }))
+    return "\"" + value + "\""
 }
 
 android {
@@ -19,7 +26,9 @@ android {
     }
 
     buildTypes {
+        debug { buildConfigField("String", "ECOZAP_API_URL", quotedUrl(serverUrl.getOrElse("http://10.0.2.2:8081"))) }
         release {
+            buildConfigField("String", "ECOZAP_API_URL", quotedUrl(serverUrl.getOrElse("")))
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -35,6 +44,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }

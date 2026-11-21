@@ -1,76 +1,43 @@
 package com.ecozap.backend.Controller;
 
-import com.ecozap.backend.dto.BookingRequest;
-import com.ecozap.backend.dto.BookingResponse;
-import com.ecozap.backend.model.user;
+import com.ecozap.backend.dto.*;
 import com.ecozap.backend.repository.UserRepository;
 import com.ecozap.backend.service.BookingService;
-
 import jakarta.validation.Valid;
-
-import org.springframework.http.ResponseEntity;
+import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
+    private final BookingService bookings;
+    private final UserRepository users;
 
-    private final BookingService bookingService;
-    private final UserRepository userRepository;
-
-    public BookingController(
-            BookingService bookingService,
-            UserRepository userRepository) {
-
-        this.bookingService = bookingService;
-        this.userRepository = userRepository;
+    public BookingController(BookingService bookings, UserRepository users) {
+        this.bookings = bookings;
+        this.users = users;
     }
 
-    // Create booking
+    @GetMapping
+    public List<BookingResponse> history(Authentication auth) {
+        return bookings.history(userId(auth));
+    }
+
     @PostMapping
-    public ResponseEntity<BookingResponse> createBooking(
-            @Valid @RequestBody BookingRequest request,
-            Authentication authentication) {
-
-        String email = authentication.getName();
-
-        user currentUser = userRepository
-                .findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
-
-        BookingResponse response =
-                bookingService.createBooking(
-                        request,
-                        currentUser.getId()
-                );
-
-        return ResponseEntity.ok(response);
+    public BookingResponse createBooking(@Valid @RequestBody BookingRequest request, Authentication auth) {
+        return bookings.createBooking(request, userId(auth));
     }
 
-    // Cancel booking
     @PostMapping("/{bookingId}/cancel")
-    public ResponseEntity<BookingResponse> cancelBooking(
-            @PathVariable String bookingId,
-            Authentication authentication) {
+    public BookingResponse cancelBooking(@PathVariable String bookingId, Authentication auth) {
+        return bookings.cancelBooking(bookingId, userId(auth));
+    }
 
-        System.out.println("CANCEL ENDPOINT REACHED");
-        System.out.println("Booking ID: " + bookingId);
-        System.out.println("User: " + authentication.getName());
-
-        String email = authentication.getName();
-
-        user currentUser = userRepository
-                .findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
-
-        BookingResponse response =
-                bookingService.cancelBooking(
-                        bookingId,
-                        currentUser.getId());
-
-        return ResponseEntity.ok(response);
+    private String userId(Authentication auth) {
+        return users.findByEmail(auth.getName()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please sign in again")).getId();
     }
 }

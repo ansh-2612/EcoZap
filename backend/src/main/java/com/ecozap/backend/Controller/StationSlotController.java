@@ -13,7 +13,11 @@ public class StationSlotController {
 
     private final StationSlotService stationSlotService;
 
-    public StationSlotController(StationSlotService stationSlotService) {
+    private final com.ecozap.backend.service.BookingService bookings;
+
+    public StationSlotController(StationSlotService stationSlotService,
+                                com.ecozap.backend.service.BookingService bookings) {
+        this.bookings = bookings;
         this.stationSlotService = stationSlotService;
     }
 
@@ -24,6 +28,12 @@ public class StationSlotController {
         return ResponseEntity.ok(
                 stationSlotService.getSlotsByStation(stationId)
         );
+    }
+
+    @GetMapping("/{stationId}/availability")
+    public List<com.ecozap.backend.dto.SlotAvailability> availability(
+            @PathVariable String stationId, @RequestParam java.time.LocalDate date) {
+        return bookings.availability(stationId, date);
     }
 
     @PostMapping("/{stationId}/slots")

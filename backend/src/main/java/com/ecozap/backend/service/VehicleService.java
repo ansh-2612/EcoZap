@@ -33,7 +33,7 @@ public class VehicleService {
                 ).orElse(null);
 
         if (specification == null) {
-            throw new RuntimeException("Vehicle specification not found");
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Vehicle specification not found");
         }
 
         Vehicle vehicle = new Vehicle();

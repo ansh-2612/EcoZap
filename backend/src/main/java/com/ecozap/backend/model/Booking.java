@@ -17,6 +17,10 @@ public class Booking {
     private String vehicleId;
     private String stationId;
     private String slotId;
+    private String reservationKey;
+    private java.time.LocalDate requestedDate;
+    private Double requestedCurrentEnergy;
+    private Double requestedTargetEnergy;
 
     private LocalDateTime bookingTime;
     private LocalDateTime arrivalTime;

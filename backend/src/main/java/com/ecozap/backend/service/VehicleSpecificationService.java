@@ -19,15 +19,10 @@ public class VehicleSpecificationService {
 
     public List<VehicleSuggestionResponse> searchVehicles(String query) {
 
-        if (query == null || query.trim().isEmpty()) {
-            return List.of();
-        }
-
-        List<VehicleSpecification> vehicles =
-                repository.findByBrandIgnoreCaseContainingOrModelIgnoreCaseContaining(
-                        query.trim(),
-                        query.trim()
-                );
+        String term = query == null ? "" : query.trim();
+        List<VehicleSpecification> vehicles = term.isEmpty()
+                ? repository.findTop20ByOrderByBrandAscModelAsc()
+                : repository.findByBrandIgnoreCaseContainingOrModelIgnoreCaseContaining(term, term);
 
         return vehicles.stream()
                 .map(vehicle -> new VehicleSuggestionResponse(

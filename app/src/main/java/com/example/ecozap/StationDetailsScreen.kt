@@ -20,6 +20,7 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
     val station = remember(stationId) { loadStationsFromAssets(context).find { it.id == stationId } }
     BookingPage(station?.name ?: "Station details", { navController.popBackStack() }) {
         if (station == null) { Text("Station not found"); return@BookingPage }
+        val notifyConfirmation = rememberBookingNotification(station.name)
         var day by rememberSaveable { mutableStateOf(todayInIndia()) }
         var revision by remember { mutableIntStateOf(0) }
         var notice by rememberSaveable(stationId, day, api.signedIn) { mutableStateOf<String?>(null) }
@@ -56,7 +57,7 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
             if (!load.busy) Text("Live booking is unavailable for this station.")
         } else {
             key(serverId, day, api.session) {
-                ReserveSlot(api, serverId, day, slots, { navController.navigate(Screen.Profile.route) }) { message ->
+                ReserveSlot(api, serverId, day, slots, notifyConfirmation, { navController.navigate(Screen.Profile.route) }) { message ->
                     notice = message
                     revision++
                 }
@@ -66,7 +67,7 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
 }
 
 @Composable
-private fun ReserveSlot(api: EcoZapApi, station: String, day: String, slots: List<LiveSlot>, account: () -> Unit, refresh: (String?) -> Unit) {
+private fun ReserveSlot(api: EcoZapApi, station: String, day: String, slots: List<LiveSlot>, notifyConfirmation: (Reservation) -> Unit, account: () -> Unit, refresh: (String?) -> Unit) {
     var selected by rememberSaveable { mutableStateOf<String?>(null) }
     val slot = slots.find { it.id == selected && it.available }
     slots.forEach { s ->
@@ -114,6 +115,7 @@ private fun ReserveSlot(api: EcoZapApi, station: String, day: String, slots: Lis
                     if (e.status == 409) { refresh(e.message); return@launchIn }
                     throw e
                 }
+                notifyConfirmation(b)
                 refresh("${b.status} · ${displayTime(b.startTime)} IST · Booking ${b.bookingId}")
             }
         }) { Text("Confirm booking") }

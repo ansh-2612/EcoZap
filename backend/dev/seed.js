@@ -1,6 +1,6 @@
-// mongosh, run on the local Compose database when its data volume is first created.
+// Used by local Compose and by the explicit Atlas import command.
 const demo = db.getSiblingDB("EcoZap");
-const stations = JSON.parse(require("fs").readFileSync("/demo/stations.json", "utf8"));
+const stations = JSON.parse(require("fs").readFileSync(process.env.ECOZAP_STATIONS_FILE || "/demo/stations.json", "utf8"));
 function addIfMissing(collection, id, doc) {
     collection.updateOne({ _id: id }, { $setOnInsert: doc }, { upsert: true });
 }

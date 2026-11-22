@@ -128,6 +128,27 @@ EcoZap/
 
 
 
+## Check Atlas without Docker
+
+Open PowerShell in the repository root with MongoDB Shell (`mongosh`) installed. Set `MONGODB_URI` in this terminal to the same connection used by Spring Boot, with the database name `/EcoZap`. The check reads the database and prints counts.
+
+```powershell
+$env:ECOZAP_DB_ACTION = "check"
+mongosh --nodb --quiet --file backend/dev/atlas.js
+```
+
+To check one reservation, set `$env:ECOZAP_BOOKING_ID = Read-Host "Booking ID from the app"` and repeat the check. After cancellation the same ID should show CANCELLED.
+
+For a demo database missing the Delhi inventory, explicitly import the fixtures from the existing Android JSON:
+
+```powershell
+$env:ECOZAP_DB_ACTION = "import"
+try { mongosh --nodb --quiet --file backend/dev/atlas.js }
+finally { Remove-Item Env:ECOZAP_DB_ACTION }
+```
+
+This inserts missing demo IDs (22 stations, 66 slot windows and two vehicle models in an empty database). Existing documents with those IDs keep their values. Bookings and users are never imported or modified. Use the check first if your database already contains stations under other IDs. Redis Cloud is needed when creating a reservation; the Atlas check works independently.
+
 ## Run the booking flow locally
 
 From the project root on Windows, start Docker Desktop and run:

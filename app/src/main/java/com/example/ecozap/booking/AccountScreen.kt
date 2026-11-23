@@ -15,6 +15,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AccountScreen(api: EcoZapApi, stations: List<Station>, onBack: () -> Unit) {
     BookingPage("My account", onBack) {
+        NotificationCheck()
         key(api.session) {
             if (api.signedIn) SignedInAccount(api, stations) else SignInForm(api)
         }

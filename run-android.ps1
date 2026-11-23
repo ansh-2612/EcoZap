@@ -43,6 +43,8 @@ try {
     if ($Serial -notin $devices) {
         throw "Choose the device to open with -Serial DEVICE_ID. Connected devices: $($devices -join ', ')."
     }
+    $androidUser = (Invoke-Adb -s $Serial shell am get-current-user).Trim()
+    if ($androidUser -notmatch '^\d+$') { throw "Could not identify the active Android user on $Serial." }
 
     if (-not $env:JAVA_HOME -and $env:ProgramFiles) {
         $studioJava = Join-Path $env:ProgramFiles 'Android/Android Studio/jbr'
@@ -55,11 +57,11 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'The Android build failed. See the Gradle error above.' }
 
     $apk = (Get-Item 'app/build/outputs/apk/debug/app-debug.apk').FullName
-    $result = @(Invoke-Adb -s $Serial install -r $apk)
+    $result = @(Invoke-Adb -s $Serial install -r --user $androidUser $apk)
     if (-not ($result -match '^Success\s*$')) { throw "Install failed. $($result -join ' ')" }
 
     $package = 'com.example.ecozap'
-    $paths = Invoke-Adb -s $Serial shell pm path --user current $package
+    $paths = Invoke-Adb -s $Serial shell pm path --user $androidUser $package
     $baseApk = @($paths | ForEach-Object { if ($_.Trim() -match '^package:(.+/base\.apk)$') { $Matches[1] } })
     if ($baseApk.Count -ne 1) { throw "Could not identify the installed APK on $Serial. Android returned: $paths" }
     $copy = [IO.Path]::GetTempFileName()
@@ -72,7 +74,7 @@ try {
     } finally { Remove-Item -LiteralPath $copy }
 
     # Start at Home even if an earlier EcoZap screen was left open (NEW_TASK | CLEAR_TASK).
-    $launch = Invoke-Adb -s $Serial shell am start -W --user current -f '0x10008000' -n "$package/.MainActivity"
+    $launch = Invoke-Adb -s $Serial shell am start -W --user $androidUser -f '0x10008000' -n "$package/.MainActivity"
     if (-not ($launch -match '^\s*Status:\s*ok\s*$')) { throw "EcoZap did not open on $Serial. $($launch -join ' ')" }
     Write-Host "Verified and opened EcoZap on $Serial (commit $revision)."
     Write-Host "Installed APK SHA-256: $hash"

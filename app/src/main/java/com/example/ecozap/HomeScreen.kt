@@ -1,5 +1,9 @@
 package com.example.ecozap.ui.home
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
@@ -126,12 +130,7 @@ fun HomeScreen(nav: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            Text(
-                text = "Welcome to EcoZap",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+            WelcomeHeading()
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 PriceCard(
@@ -367,4 +366,20 @@ private fun BottomNav(nav: NavController, context: android.content.Context){
             }
         )
     }
+}
+@Composable
+private fun WelcomeHeading() {
+    val reveal = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { reveal.animateTo(1f, tween(750)) }
+    Text(
+        text = "Welcome to EcoZap",
+        style = MaterialTheme.typography.headlineMedium.copy(
+            brush = Brush.horizontalGradient(listOf(NeonGreen, NeonCyan)),
+            fontWeight = FontWeight.Bold
+        ),
+        modifier = Modifier.graphicsLayer {
+            alpha = 0.35f + 0.65f * reveal.value
+            translationY = 8.dp.toPx() * (1f - reveal.value)
+        }
+    )
 }

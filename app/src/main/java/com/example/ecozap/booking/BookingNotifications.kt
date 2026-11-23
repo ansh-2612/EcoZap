@@ -21,12 +21,13 @@ import com.example.ecozap.R
 private const val CHANNEL = "booking_updates"
 
 @Composable
-internal fun rememberBookingNotification(station: String): (Reservation) -> Unit {
+internal fun rememberBookingNotification(station: String, onDelivery: (Boolean) -> Unit): (Reservation) -> Unit {
     val context = LocalContext.current
     var pendingId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingText by rememberSaveable { mutableStateOf("") }
+    val delivery by rememberUpdatedState(onDelivery)
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        pendingId?.let { if (granted) postBookingNotification(context, it, pendingText) }
+        pendingId?.let { delivery(granted && postBookingNotification(context, it, pendingText)) }
         pendingId = null
     }
     return { booking ->
@@ -38,7 +39,7 @@ internal fun rememberBookingNotification(station: String): (Reservation) -> Unit
                 pendingId = booking.bookingId
                 pendingText = body
                 permission.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else postBookingNotification(context, booking.bookingId, body)
+            } else delivery(postBookingNotification(context, booking.bookingId, body))
         }
     }
 }
@@ -46,7 +47,7 @@ internal fun rememberBookingNotification(station: String): (Reservation) -> Unit
 internal fun postBookingNotification(context: Context, id: String, body: String, title: String = "Booking confirmed", notificationId: Int = 1): Boolean {
     val manager = context.getSystemService(NotificationManager::class.java)
     if (Build.VERSION.SDK_INT >= 26) {
-        manager.createNotificationChannel(NotificationChannel(CHANNEL, "Booking updates", NotificationManager.IMPORTANCE_DEFAULT))
+        manager.createNotificationChannel(NotificationChannel(CHANNEL, "Booking updates", NotificationManager.IMPORTANCE_HIGH))
     }
     if (!manager.areNotificationsEnabled() || (Build.VERSION.SDK_INT >= 26 &&
         manager.getNotificationChannel(CHANNEL)?.importance == NotificationManager.IMPORTANCE_NONE)) return false
@@ -56,6 +57,7 @@ internal fun postBookingNotification(context: Context, id: String, body: String,
     val notification = NotificationCompat.Builder(context, CHANNEL)
         .setSmallIcon(R.drawable.ic_booking_notification).setContentTitle(title)
         .setContentText(body).setStyle(NotificationCompat.BigTextStyle().bigText(body))
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setContentIntent(open).setAutoCancel(true).setOnlyAlertOnce(true)
         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).build()
     return try { manager.notify(id, notificationId, notification); true } catch (_: SecurityException) {

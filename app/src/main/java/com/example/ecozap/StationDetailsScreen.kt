@@ -20,7 +20,21 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
     val station = remember(stationId) { loadStationsFromAssets(context).find { it.id == stationId } }
     BookingPage(station?.name ?: "Station details", { navController.popBackStack() }) {
         if (station == null) { Text("Station not found"); return@BookingPage }
-        val notifyConfirmation = rememberBookingNotification(station.name)
+        var receipt by rememberSaveable(stationId, api.signedIn) { mutableStateOf<String?>(null) }
+        var delivered by rememberSaveable(stationId, api.signedIn) { mutableStateOf<Boolean?>(null) }
+        val notifyConfirmation = rememberBookingNotification(station.name) { delivered = it }
+        receipt?.let { details ->
+            AlertDialog(onDismissRequest = { receipt = null }, title = { Text("Booking confirmed") },
+                text = { Column {
+                    Text(details)
+                    if (delivered == false) Text("Device notifications are blocked. Open You → Test booking notification to check settings.")
+                    if (delivered == true) Text("Your confirmation is in the notification shade.")
+                } },
+                confirmButton = { TextButton(onClick = { receipt = null; navController.navigate(Screen.Profile.route) }) {
+                    Text("My bookings")
+                } },
+                dismissButton = { TextButton(onClick = { receipt = null }) { Text("Done") } })
+        }
         var day by rememberSaveable { mutableStateOf(todayInIndia()) }
         var revision by remember { mutableIntStateOf(0) }
         var notice by rememberSaveable(stationId, day, api.signedIn) { mutableStateOf<String?>(null) }
@@ -57,7 +71,13 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
             if (!load.busy) Text("Live booking is unavailable for this station.")
         } else {
             key(serverId, day, api.session) {
-                ReserveSlot(api, serverId, day, slots, notifyConfirmation, { navController.navigate(Screen.Profile.route) }) { message ->
+                ReserveSlot(api, serverId, day, slots, { booking ->
+                    if (booking.status == "CONFIRMED") {
+                        delivered = null
+                        receipt = "${station.name}\n${displayTime(booking.startTime)} IST\nBooking ID: ${booking.bookingId}"
+                        notifyConfirmation(booking)
+                    }
+                }, { navController.navigate(Screen.Profile.route) }) { message ->
                     notice = message
                     revision++
                 }

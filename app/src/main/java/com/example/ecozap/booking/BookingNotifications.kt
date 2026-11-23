@@ -26,23 +26,24 @@ internal fun rememberBookingNotification(station: String): (Reservation) -> Unit
     var pendingId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingText by rememberSaveable { mutableStateOf("") }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        pendingId?.let { if (granted) showConfirmation(context, it, pendingText) }
+        pendingId?.let { if (granted) postBookingNotification(context, it, pendingText) }
         pendingId = null
     }
     return { booking ->
         if (booking.status == "CONFIRMED") {
+            BookingReminders.schedule(context, booking, station)
             val body = "$station · ${displayTime(booking.startTime)} IST · Booking ${booking.bookingId}"
             if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context,
                     Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 pendingId = booking.bookingId
                 pendingText = body
                 permission.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else showConfirmation(context, booking.bookingId, body)
+            } else postBookingNotification(context, booking.bookingId, body)
         }
     }
 }
 
-private fun showConfirmation(context: Context, id: String, body: String) {
+internal fun postBookingNotification(context: Context, id: String, body: String, title: String = "Booking confirmed", notificationId: Int = 1) {
     val manager = context.getSystemService(NotificationManager::class.java)
     if (Build.VERSION.SDK_INT >= 26) {
         manager.createNotificationChannel(NotificationChannel(CHANNEL, "Booking updates", NotificationManager.IMPORTANCE_DEFAULT))
@@ -52,11 +53,11 @@ private fun showConfirmation(context: Context, id: String, body: String) {
         Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     val notification = NotificationCompat.Builder(context, CHANNEL)
-        .setSmallIcon(R.drawable.ic_booking_notification).setContentTitle("Booking confirmed")
+        .setSmallIcon(R.drawable.ic_booking_notification).setContentTitle(title)
         .setContentText(body).setStyle(NotificationCompat.BigTextStyle().bigText(body))
         .setContentIntent(open).setAutoCancel(true).setOnlyAlertOnce(true)
         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).build()
-    try { manager.notify(id, 1, notification) } catch (_: SecurityException) {
+    try { manager.notify(id, notificationId, notification) } catch (_: SecurityException) {
         // Permission may have changed while the booking was being confirmed.
     }
 }

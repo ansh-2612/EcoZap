@@ -60,6 +60,7 @@ private fun SignInForm(api: EcoZapApi) {
 
 @Composable
 private fun SignedInAccount(api: EcoZapApi, stations: List<Station>) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     var revision by remember { mutableIntStateOf(0) }
     var profile by remember { mutableStateOf<Account?>(null) }
     var vehicles by remember { mutableStateOf(listOf<Vehicle>()) }
@@ -75,6 +76,10 @@ private fun SignedInAccount(api: EcoZapApi, stations: List<Station>) {
             profile = api.profile()
             vehicles = api.vehicles()
             bookings = api.history()
+            bookings.forEach { b ->
+                val station = stations.find { "delhi-${it.id}" == b.stationId }
+                BookingReminders.schedule(context, b, station?.name ?: "Station ${b.stationId}")
+            }
             loaded = true
         }
     }

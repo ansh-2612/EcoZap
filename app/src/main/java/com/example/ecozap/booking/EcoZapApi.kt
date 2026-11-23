@@ -34,6 +34,7 @@ data class BookingInput(val vehicleId: String, val stationId: String, val slotId
 class ApiException(val status: Int, message: String) : IOException(message)
 
 class EcoZapApi(context: Context) {
+    private val appContext = context.applicationContext
     private val prefs = context.getSharedPreferences("ecozap_login", Context.MODE_PRIVATE)
     private val gson = Gson()
     private var token by mutableStateOf(prefs.getString("token", null))
@@ -53,6 +54,7 @@ class EcoZapApi(context: Context) {
     }
 
     fun signOut() {
+        BookingReminders.clear(appContext)
         token = null
         prefs.edit().remove("token").apply()
     }
@@ -69,7 +71,9 @@ class EcoZapApi(context: Context) {
     suspend fun book(input: BookingInput): Reservation =
         gson.fromJson(request("bookings", "POST", input, true), Reservation::class.java)
     suspend fun cancel(id: String): Reservation =
-        gson.fromJson(request("bookings/${Uri.encode(id)}/cancel", "POST", auth = true), Reservation::class.java)
+        gson.fromJson(request("bookings/${Uri.encode(id)}/cancel", "POST", auth = true), Reservation::class.java).also {
+            if (it.status == "CANCELLED") BookingReminders.cancel(appContext, it.bookingId)
+        }
 
     private suspend inline fun <reified T> list(path: String, auth: Boolean = false): List<T> =
         gson.fromJson(request(path, auth = auth), TypeToken.getParameterized(List::class.java, T::class.java).type)

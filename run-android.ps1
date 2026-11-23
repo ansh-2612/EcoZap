@@ -2,7 +2,14 @@ param([string]$Serial)
 
 $ErrorActionPreference = 'Stop'
 
-function Find-Adb {
+function Test-SdkPackages([string]$folder) {
+    foreach ($component in 'platforms', 'build-tools', 'cmdline-tools') {
+        if (Test-Path -LiteralPath (Join-Path $folder $component) -PathType Container) { return $true }
+    }
+    return $false
+}
+
+function Find-AndroidTools {
     $sdkFolders = @()
     if (Test-Path 'local.properties') {
         $line = Get-Content 'local.properties' | Where-Object { $_ -match '^\s*sdk\.dir\s*=' } | Select-Object -Last 1
@@ -12,15 +19,30 @@ function Find-Adb {
     }
     $sdkFolders += @($env:ANDROID_HOME, $env:ANDROID_SDK_ROOT)
     if ($env:LOCALAPPDATA) { $sdkFolders += Join-Path $env:LOCALAPPDATA 'Android/Sdk' }
+    $sdk = $null
+    $adbPath = $null
     foreach ($folder in $sdkFolders) {
-        if ($folder) {
-            $candidate = Join-Path $folder 'platform-tools/adb.exe'
-            if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+        if (-not $folder -or -not (Test-Path -LiteralPath $folder -PathType Container)) { continue }
+        $candidate = Join-Path $folder 'platform-tools/adb.exe'
+        $hasAdb = Test-Path -LiteralPath $candidate -PathType Leaf
+        if (-not $adbPath -and $hasAdb) { $adbPath = (Get-Item -LiteralPath $candidate).FullName }
+        if (-not $sdk -and ($hasAdb -or (Test-SdkPackages $folder))) {
+            $sdk = (Get-Item -LiteralPath $folder).FullName
         }
     }
-    $command = Get-Command adb.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($command) { return $command.Source }
-    throw 'Could not find adb. In Android Studio, open SDK Manager and install Android SDK Platform-Tools.'
+    if (-not $adbPath) {
+        $command = Get-Command adb.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $command) { throw 'Could not find adb. In Android Studio, open SDK Manager and install Android SDK Platform-Tools.' }
+        $adbPath = $command.Source
+        $toolsDir = (Get-Item -LiteralPath $adbPath).Directory
+        if (-not $sdk -and $toolsDir.Name -eq 'platform-tools' -and (Test-SdkPackages $toolsDir.Parent.FullName)) {
+            $sdk = $toolsDir.Parent.FullName
+        }
+    }
+    if (-not $sdk) {
+        throw 'Found adb but could not locate the Android SDK. Open Tools > SDK Manager in Android Studio, set $env:ANDROID_HOME to the Android SDK Location shown there, and run this script again.'
+    }
+    return @{ Sdk = $sdk; Adb = $adbPath }
 }
 
 function Invoke-Adb {
@@ -31,8 +53,14 @@ function Invoke-Adb {
 
 Push-Location -LiteralPath $PSScriptRoot
 $previousJavaHome = $env:JAVA_HOME
+$previousAndroidHome = $env:ANDROID_HOME
+$previousSdkRoot = $env:ANDROID_SDK_ROOT
 try {
-    $adb = Find-Adb
+    $androidTools = Find-AndroidTools
+    $adb = $androidTools.Adb
+    $env:ANDROID_HOME = $androidTools.Sdk
+    if ($previousSdkRoot) { $env:ANDROID_SDK_ROOT = $androidTools.Sdk }
+    Write-Host "Android SDK: $env:ANDROID_HOME"
     $devices = @(Invoke-Adb devices | ForEach-Object {
         if ($_ -match '^(\S+)\s+device\s*$') { $Matches[1] }
     })
@@ -79,6 +107,8 @@ try {
     Write-Host "Verified and opened EcoZap on $Serial (commit $revision)."
     Write-Host "Installed APK SHA-256: $hash"
 } finally {
+    $env:ANDROID_HOME = $previousAndroidHome
+    $env:ANDROID_SDK_ROOT = $previousSdkRoot
     $env:JAVA_HOME = $previousJavaHome
     Pop-Location
 }

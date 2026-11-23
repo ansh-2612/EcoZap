@@ -161,6 +161,14 @@ cd backend
 
 Use JDK 17 or 21. Open the project root in Android Studio and run the debug app on an emulator. The emulator connects to Spring Boot at `http://10.0.2.2:8081`. For a USB device, use `adb reverse tcp:8081 tcp:8081` and set `ECOZAP_API_URL=http://localhost:8081` in your user Gradle properties. For a hosted API, set that property to the HTTPS origin, without `/api`.
 
+If Android Studio keeps showing an older screen on Windows, start your emulator or connect your phone. Run this command in PowerShell from the project root.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\run-android.ps1
+```
+
+The script builds this checkout, updates EcoZap on your selected device, compares the installed APK with the build, and opens the Home screen. If several devices are connected, append `-Serial DEVICE_ID` using one of the IDs it prints. Open **You → Test booking notification** to check alerts. This check works while signed out and with the backend offline.
+
 On first startup the local Mongo container imports the existing Android asset `app/src/main/assets/delhi_stations.json`. It uses stable IDs for each station and slot. The sample availability flags stay in the asset; dated availability comes from saved reservations. To import missing demo records into an existing local Compose volume, run `docker compose exec mongo mongosh --quiet /docker-entrypoint-initdb.d/10-ecozap.js`. Existing records are preserved.
 
 1. Open **You**, create an account and add a Demo Electric car or Demo CNG car with a registration number.

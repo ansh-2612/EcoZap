@@ -1,8 +1,7 @@
 package com.example.ecozap.ui.theme
 
-import android.app.Activity
+import androidx.compose.ui.graphics.Color
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -12,9 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = NeonGreen, onPrimary = Night900,
+    secondary = NeonCyan, onSecondary = Night900,
+    tertiary = NeonBlue, onTertiary = Night900,
+    primaryContainer = CardDark, onPrimaryContainer = NeonGreen,
+    secondaryContainer = CardDark, onSecondaryContainer = NeonCyan,
+    background = Night900, onBackground = Color.White,
+    surface = Night900, onSurface = Color.White,
+    surfaceVariant = CardDark, onSurfaceVariant = TextDim,
+    surfaceContainerLowest = Night900, surfaceContainerLow = Night800,
+    surfaceContainer = CardDark, surfaceContainerHigh = CardDarker,
+    surfaceContainerHighest = Night800, outline = TextDim,
+    error = DangerRed, onError = Night900
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -35,9 +43,9 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun EcoZapTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

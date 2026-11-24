@@ -111,7 +111,14 @@ class EcoZapApi(context: Context) {
             if (e.status == 401 && credential != null && credential == token) signOut()
             throw e
         } catch (e: IOException) {
-            throw IOException("Could not reach EcoZap. Check the connection and try again.", e)
+            val message = when (base) {
+                "http://localhost:8081", "http://127.0.0.1:8081" ->
+                    "Could not reach the booking server. Start EcoZap on your computer on port 8081, keep USB connected, then refresh."
+                "http://10.0.2.2:8081" ->
+                    "Could not reach the booking server. Check that EcoZap is running on your computer on port 8081, then refresh."
+                else -> "Could not reach the booking server. Check the connection and try again."
+            }
+            throw IOException(message, e)
         }
     }
 

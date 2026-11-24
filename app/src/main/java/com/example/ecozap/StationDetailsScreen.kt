@@ -68,7 +68,7 @@ fun StationDetailsScreen(navController: NavController, stationId: Int?, api: Eco
         val serverId = live?.id
         if (serverId == null) {
             Text("Directory hours · ${station.slots.joinToString { it.time }}")
-            if (!load.busy) Text("Live booking is unavailable for this station.")
+            if (!load.busy && load.error == null) Text("Online booking is unavailable for this station.")
         } else {
             key(serverId, day, api.session) {
                 ReserveSlot(api, serverId, day, slots, { booking ->

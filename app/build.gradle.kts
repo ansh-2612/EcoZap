@@ -26,7 +26,7 @@ android {
     }
 
     buildTypes {
-        debug { buildConfigField("String", "ECOZAP_API_URL", quotedUrl(serverUrl.getOrElse("http://10.0.2.2:8081"))) }
+        debug { buildConfigField("String", "ECOZAP_API_URL", quotedUrl(serverUrl.orElse(providers.gradleProperty("ECOZAP_DEVICE_DEFAULT_URL")).getOrElse("http://10.0.2.2:8081"))) }
         release {
             buildConfigField("String", "ECOZAP_API_URL", quotedUrl(serverUrl.getOrElse("")))
             isMinifyEnabled = false

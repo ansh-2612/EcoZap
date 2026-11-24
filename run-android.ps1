@@ -81,7 +81,17 @@ try {
     $revision = git rev-parse --short HEAD
     if ($LASTEXITCODE -ne 0) { throw 'Could not identify the Git checkout.' }
     Write-Host "Building EcoZap from $PSScriptRoot at commit $revision for $Serial"
-    & .\gradlew.bat :app:assembleDebug
+    $buildArgs = @(':app:assembleDebug')
+    if ($Serial -notlike 'emulator-*') {
+        # Android's localhost reaches this computer while the USB debugging connection is active.
+        try {
+            Invoke-Adb -s $Serial reverse tcp:8081 tcp:8081 | Out-Null
+        } catch {
+            Write-Warning "USB forwarding failed. Local bookings require port 8081. $_"
+        }
+        $buildArgs += '-PECOZAP_DEVICE_DEFAULT_URL=http://localhost:8081'
+    }
+    & .\gradlew.bat @buildArgs
     if ($LASTEXITCODE -ne 0) { throw 'The Android build failed. See the Gradle error above.' }
 
     $apk = (Get-Item 'app/build/outputs/apk/debug/app-debug.apk').FullName

@@ -45,6 +45,44 @@ function Find-AndroidTools {
     return @{ Sdk = $sdk; Adb = $adbPath }
 }
 
+function Find-BuildJava {
+    $candidates = @()
+    if ($env:JAVA_HOME) { $candidates += Join-Path $env:JAVA_HOME 'bin/java.exe' }
+    if ($env:ProgramFiles) { $candidates += Join-Path $env:ProgramFiles 'Android/Android Studio/jbr/bin/java.exe' }
+    $candidates += @(Get-Command java.exe -All -CommandType Application -ErrorAction SilentlyContinue | ForEach-Object { $_.Source })
+    $roots = @("$env:USERPROFILE/.jdks", "$env:ProgramFiles/Microsoft", "$env:ProgramFiles/Eclipse Adoptium", "$env:ProgramFiles/Java")
+    foreach ($root in $roots) {
+        $candidates += @(Get-ChildItem -LiteralPath $root -Directory -ErrorAction SilentlyContinue |
+            ForEach-Object { Join-Path $_.FullName 'bin/java.exe' })
+    }
+    foreach ($java in ($candidates | Select-Object -Unique)) {
+        if (-not (Test-Path -LiteralPath $java -PathType Leaf)) { continue }
+        $start = New-Object System.Diagnostics.ProcessStartInfo
+        $start.FileName = $java
+        $start.Arguments = '-XshowSettings:properties -version'
+        $start.UseShellExecute = $false
+        $start.RedirectStandardError = $true
+        $process = $null
+        try {
+            $process = [Diagnostics.Process]::Start($start)
+            $settings = $process.StandardError.ReadToEnd()
+            $process.WaitForExit()
+            if ($process.ExitCode -ne 0) { continue }
+            if ($settings -notmatch '(?m)^\s*java\.specification\.version\s*=\s*(\d+)\s*$') { continue }
+            $major = [int]$Matches[1]
+            if ($major -lt 17 -or $major -gt 23) { continue }
+            if ($settings -notmatch '(?m)^\s*java\.home\s*=\s*(.+)$') { continue }
+            $jdk = $Matches[1].Trim()
+            if (Test-Path -LiteralPath "$jdk/bin/javac.exe" -PathType Leaf) { return $jdk }
+        } catch [System.ComponentModel.Win32Exception] {
+            continue
+        } finally {
+            if ($process) { $process.Dispose() }
+        }
+    }
+    throw 'No working JDK found for EcoZap. Install Microsoft OpenJDK 17 or set JAVA_HOME to an installed JDK 17 or 21, then rerun.'
+}
+
 function Invoke-Adb {
     $output = & $adb @args
     if ($LASTEXITCODE -ne 0) { throw "adb $($args -join ' ') failed (exit $LASTEXITCODE). $($output -join ' ')" }
@@ -74,10 +112,8 @@ try {
     $androidUser = (Invoke-Adb -s $Serial shell am get-current-user).Trim()
     if ($androidUser -notmatch '^\d+$') { throw "Could not identify the active Android user on $Serial." }
 
-    if (-not $env:JAVA_HOME -and $env:ProgramFiles) {
-        $studioJava = Join-Path $env:ProgramFiles 'Android/Android Studio/jbr'
-        if (Test-Path -LiteralPath "$studioJava/bin/java.exe") { $env:JAVA_HOME = $studioJava }
-    }
+    $env:JAVA_HOME = Find-BuildJava
+    Write-Host "Build JDK: $env:JAVA_HOME"
     $revision = git rev-parse --short HEAD
     if ($LASTEXITCODE -ne 0) { throw 'Could not identify the Git checkout.' }
     Write-Host "Building EcoZap from $PSScriptRoot at commit $revision for $Serial"
